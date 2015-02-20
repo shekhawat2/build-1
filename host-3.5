@@ -1,0 +1,75 @@
+#!/bin/bash
+# Copyright (C) 2015 Joe Maples
+# Licensed under the Apache License, Version 2.0 (the "License");
+#   You may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+###########################################################################
+###########################################################################
+#####                                                                 #####
+#####              B U I L D   C O N F I G U R A T I O N              #####
+#####                                                                 #####
+###########################################################################
+###########################################################################
+
+# Make sure LLVM and friends are at the correct version, 3.5
+cd ../llvm && git reset --hard && git fetch https://github.com/frap129/llvm.git release_35 && git checkout FETCH_HEAD && cd ../build;
+cd ../llvm/tools/clang && git reset --hard && git fetch https://github.com/frap129/clang.git release_35 && git checkout FETCH_HEAD && cd ../build;
+cd ../llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_35 && git checkout FETCH_HEAD && cd ../build;
+
+# Try to parallelize the build for faster performance.
+JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+
+# Determine Make flags
+MAKE_FLAGS=-j"$JOBS"
+
+# Make a clean build
+if [ -e Makefile ];
+then
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
+fi;
+
+# Create out directory
+mkdir -p ../out;
+
+# Export Prefix Path
+export PREFIX_PATH=../out/host-3.5;
+export PREFIX=--prefix=$PREFIX_PATH;
+
+# Build ISL
+cd ../isl;
+./configure --enable-static --enable-shared;
+make $MAKE_FLAGS;
+make install;
+
+# Build CLooG
+cd ../cloog;
+./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
+make $MAKE_FLAGS;
+make install;
+
+# Cleanup
+make $MAKE_FLAGS clean;
+make $MAKE_FLAGS distclean;
+
+# Build LibFFI
+cd ../libffi;
+./configure --enable-static --enable-shared;
+make $MAKE_FLAGS;
+make install;
+
+# Build LLVM
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads;
+if ! make -j$CPUS; then
+	echo "LLVM failed to build."
+	exit 1
+fi
