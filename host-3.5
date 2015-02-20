@@ -1,5 +1,6 @@
 #!/bin/bash
 # Copyright (C) 2015 Joe Maples
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 #   You may not use this file except in compliance with the License.
 #   You may obtain a copy of the License at
@@ -20,13 +21,17 @@
 ###########################################################################
 ###########################################################################
 
+# Add Optimizations to LLVM
+[ -z "$CFLAGS" ] && CFLAGS="-O3"
+[ -z "$CXXFLAGS" ] && CXXFLAGS="-O3"
+
 # Make sure LLVM and friends are at the correct version, 3.5
 cd ../llvm && git reset --hard && git fetch https://github.com/frap129/llvm.git release_35 && git checkout FETCH_HEAD && cd ../build;
-cd ../llvm/tools/clang && git reset --hard && git fetch https://github.com/frap129/clang.git release_35 && git checkout FETCH_HEAD && cd ../build;
-cd ../llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_35 && git checkout FETCH_HEAD && cd ../build;
+cd ../llvm/tools/clang && git reset --hard && git fetch https://github.com/frap129/clang.git release_35 && git checkout FETCH_HEAD && cd ../../../build;
+cd ../llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_35 && git checkout FETCH_HEAD && cd ../../../build;
 
 # Try to parallelize the build for faster performance.
-JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+JOBS="4";
 
 # Determine Make flags
 MAKE_FLAGS=-j"$JOBS"
@@ -42,20 +47,20 @@ fi;
 mkdir -p ../out;
 
 # Export Prefix Path
-export PREFIX_PATH=../out/host-3.5;
+export PREFIX_PATH=/tmp/host-3.5;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 # Build ISL
 cd ../isl;
 ./configure --enable-static --enable-shared;
 make $MAKE_FLAGS;
-make install;
+sudo make install;
 
 # Build CLooG
 cd ../cloog;
 ./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
 make $MAKE_FLAGS;
-make install;
+sudo make install;
 
 # Cleanup
 make $MAKE_FLAGS clean;
@@ -63,13 +68,18 @@ make $MAKE_FLAGS distclean;
 
 # Build LibFFI
 cd ../libffi;
+./autogen.sh;
 ./configure --enable-static --enable-shared;
 make $MAKE_FLAGS;
-make install;
+sudo make install;
 
 # Build LLVM
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads;
+cd ../llvm;
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --with-isl=system --with-cloog=system;
 if ! make -j$CPUS; then
 	echo "LLVM failed to build."
 	exit 1
 fi
+
+# Copy Toolchain
+cp -R /tmp/host-3.5 ../out/
