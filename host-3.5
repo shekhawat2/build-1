@@ -13,6 +13,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# Define Color Values
+red=$(tput setaf 1) # red
+grn=$(tput setaf 2) # green
+blu=$(tput setaf 4) # blue
+cya=$(tput setaf 6) # cyan
+txtbld=$(tput bold) # Bold
+bldred=${txtbld}$(tput setaf 1) # red
+bldgrn=${txtbld}$(tput setaf 2) # green
+bldblu=${txtbld}$(tput setaf 4) # blue
+bldcya=${txtbld}$(tput setaf 6) # cyan
+txtrst=$(tput sgr0) # Reset
+
 ###########################################################################
 ###########################################################################
 #####                                                                 #####
@@ -20,36 +32,59 @@
 #####                                                                 #####
 ###########################################################################
 ###########################################################################
-# Define User
-USER=syrup-man
 
-# Add Optimizations to LLVM
-[ -z "$CFLAGS" ] && CFLAGS="-O2"
-[ -z "$CXXFLAGS" ] && CXXFLAGS="-O2"
+# Find Source Root
+cd ../ && export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+cd build;
 
 # Make sure LLVM and friends are at the correct version, 3.5
-cd ../llvm && git reset --hard && git fetch https://github.com/frap129/llvm.git release_35 && git checkout FETCH_HEAD && cd ../build;
-cd ../llvm/tools/clang && git reset --hard && git fetch https://github.com/frap129/clang.git release_35 && git checkout FETCH_HEAD && cd ../../../build;
-cd ../llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_35 && git checkout FETCH_HEAD && cd ../../../build;
+cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch https://github.com/frap129/llvm.git release_35 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch https://github.com/frap129/clang.git release_35 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_35 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
 
-# Try to parallelize the build for faster performance.
-JOBS="4";
+# Find Host OS and set OS specific variables
+IS_DARWIN=$(uname -a | grep Darwin)
+if [ -n "$IS_DARWIN" ]; then
+  CPUS=$(sysctl hw.ncpu | awk '{print $2}')
+  DATE=gdate
+else
+  CPUS=$(grep "^processor" /proc/cpuinfo | wc -l)
+  DATE=date
+fi
+
+# Optimize CPU Threads
+JOBS=$(bc <<< "($CPUS-1)*2")
 
 # Determine Make flags
-MAKE_FLAGS=-j"$JOBS"
+MAKE_FLAGS=-j"$JOBS";
 
-# Make a clean build
-if [ -e Makefile ];
+# Clean LLVM, CLooG, and ISL
+if [ -e $TOOLCHAIN_ROOT/llvm/Makefile ];
 then
+    cd $TOOLCHAIN_ROOT/llvm;
     make $MAKE_FLAGS clean;
     make $MAKE_FLAGS distclean;
 fi;
 
-# Create out directory
-mkdir -p ../out;
+if [ -e $TOOLCHAIN_ROOT/cloog/Makefile ];
+then
+    cd $TOOLCHAIN_ROOT/cloog;
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
+fi;
+
+if [ -e $TOOLCHAIN_ROOT/isl/Makefile ];
+then
+    cd $TOOLCHAIN_ROOT/isl;
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
+fi;
+
+
+cd $TOOLCHAIN_ROOT/build;
 
 # Export Prefix Path
-export PREFIX_PATH=/home/$USER/llvm-build/out/host-3.5;
+export PREFIX_PATH=$TOOLCHAIN_ROOT/out/host-3.5;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -61,36 +96,54 @@ else
 fi;
 
 # Build ISL
-cd ../isl;
-./configure --enable-static --enable-shared;
-make $MAKE_FLAGS;
-sudo make install;
+if ! [ -e $TOOLCHAIN_ROOT/out/isl ];
+then
+  cd $TOOLCHAIN_ROOT/isl;
+  ./configure --enable-static --enable-shared;
+  if ! make $MAKE_FLAGS; then
+    echo "ISL failed to build.";
+    exit 1;
+  else
+    sudo make install;
+    touch $TOOLCHAIN_ROOT/out/isl;	
+  fi
+fi
 
 # Build CLooG
-cd ../cloog;
-./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
-make $MAKE_FLAGS;
-sudo make install;
+if ! [ -e $TOOLCHAIN_ROOT/out/cloog ];
+then
+  cd $TOOLCHAIN_ROOT/cloog;
+  ./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
+  if ! make $MAKE_FLAGS; then
+    echo "ISL failed to build.";
+    exit 1;
+  else
+    sudo make install;
+    touch $TOOLCHAIN_ROOT/out/cloog;	
+  fi
+fi
 
-# Cleanup
-make $MAKE_FLAGS clean;
-make $MAKE_FLAGS distclean;
+# Add Optimizations to LLVM
+[ -z "$CFLAGS" ] && export CFLAGS="-O2"
+[ -z "$CXXFLAGS" ] && export CXXFLAGS="-O2"
 
-# Build LibFFI
-cd ../libffi;
-./autogen.sh;
-./configure --enable-static --enable-shared;
-make $MAKE_FLAGS;
-sudo make install;
+# Configure LLVM
+cd $TOOLCHAIN_ROOT/llvm;
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --with-isl=yes --with-cloog=yes;
 
-# Use GCC to compile LLVM
-export CC=gcc;
-export CXX=g++;
+# Find Time Before Build 
+START_TIME=$($DATE +%s)
 
 # Build LLVM
-cd ../llvm;
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --with-isl=/usr/lib --with-cloog=/usr/bin;
-if ! make $MAKE_FLAGS; then
+if ! time make $MAKE_FLAGS; then
 	echo "LLVM failed to build."
 	exit 1
+else
+	make install && make install;
 fi
+
+# Echo Build Time
+END_TIME=$($DATE +%s)
+tmin=$(( (t2-t1)/60 ))
+tsec=$(( (t2-t1)%60 ))
+echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst}
