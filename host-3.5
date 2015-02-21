@@ -136,14 +136,13 @@ START_TIME=$($DATE +%s)
 
 # Build LLVM
 if ! time make $MAKE_FLAGS; then
-	echo "LLVM failed to build."
-	exit 1
+  echo "LLVM failed to build."
+  exit 1
 else
-	make install && make install;
+  make install && make install;
+  # Echo Time if Build Finishes
+  END_TIME=$($DATE +%s)
+  tmin=$(( (END_TIME-START_TIME)/60 ))
+  tsec=$(( (END_TIME-START_TIME)%60 ))
+  echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst}
 fi
-
-# Echo Build Time
-END_TIME=$($DATE +%s)
-tmin=$(( (t2-t1)/60 ))
-tsec=$(( (t2-t1)%60 ))
-echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst}
