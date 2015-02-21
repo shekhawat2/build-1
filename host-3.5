@@ -20,10 +20,12 @@
 #####                                                                 #####
 ###########################################################################
 ###########################################################################
+# Define User
+USER=syrup-man
 
 # Add Optimizations to LLVM
-[ -z "$CFLAGS" ] && CFLAGS="-O3"
-[ -z "$CXXFLAGS" ] && CXXFLAGS="-O3"
+[ -z "$CFLAGS" ] && CFLAGS="-O2"
+[ -z "$CXXFLAGS" ] && CXXFLAGS="-O2"
 
 # Make sure LLVM and friends are at the correct version, 3.5
 cd ../llvm && git reset --hard && git fetch https://github.com/frap129/llvm.git release_35 && git checkout FETCH_HEAD && cd ../build;
@@ -47,8 +49,16 @@ fi;
 mkdir -p ../out;
 
 # Export Prefix Path
-export PREFIX_PATH=/tmp/host-3.5;
+export PREFIX_PATH=/home/$USER/llvm-build/out/host-3.5;
 export PREFIX=--prefix=$PREFIX_PATH;
+
+if [ -d "$PREFIX_PATH" ];
+then
+    rm -rf $PREFIX_PATH;
+    mkdir -p $PREFIX_PATH;
+else
+    mkdir -p $PREFIX_PATH;
+fi;
 
 # Build ISL
 cd ../isl;
@@ -73,13 +83,14 @@ cd ../libffi;
 make $MAKE_FLAGS;
 sudo make install;
 
+# Use GCC to compile LLVM
+export CC=gcc;
+export CXX=g++;
+
 # Build LLVM
 cd ../llvm;
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --with-isl=system --with-cloog=system;
-if ! make -j$CPUS; then
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --with-isl=/usr/lib --with-cloog=/usr/bin;
+if ! make $MAKE_FLAGS; then
 	echo "LLVM failed to build."
 	exit 1
 fi
-
-# Copy Toolchain
-cp -R /tmp/host-3.5 ../out/
