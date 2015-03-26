@@ -96,7 +96,7 @@ else
 fi;
 
 # Build ISL
-if ! [ -e $TOOLCHAIN_ROOT/out/isl ];
+if ! [ -e $TOOLCHAIN_ROOT/out/isl.made ];
 then
   cd $TOOLCHAIN_ROOT/isl;
   ./configure --enable-static --enable-shared;
@@ -105,12 +105,12 @@ then
     exit 1;
   else
     sudo make install;
-    touch $TOOLCHAIN_ROOT/out/isl;	
+    touch $TOOLCHAIN_ROOT/out/isl.made;	
   fi
 fi
 
 # Build CLooG
-if ! [ -e $TOOLCHAIN_ROOT/out/cloog ];
+if ! [ -e $TOOLCHAIN_ROOT/out/cloog.made ];
 then
   cd $TOOLCHAIN_ROOT/cloog;
   ./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
@@ -119,7 +119,7 @@ then
     exit 1;
   else
     sudo make install;
-    touch $TOOLCHAIN_ROOT/out/cloog;	
+    touch $TOOLCHAIN_ROOT/out/cloog.made;	
   fi
 fi
 
@@ -129,7 +129,7 @@ fi
 
 # Configure LLVM
 cd $TOOLCHAIN_ROOT/llvm;
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --with-isl=yes --with-cloog=yes;
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --with-isl=/usr/ --with-cloog=yes;
 
 # Find Time Before Build 
 START_TIME=$($DATE +%s)
