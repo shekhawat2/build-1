@@ -129,7 +129,7 @@ fi
 
 # Configure LLVM
 cd $TOOLCHAIN_ROOT/llvm;
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --with-isl=/usr/ --with-cloog=yes --target=arm-eabi;
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --with-isl=/usr/ --with-cloog=yes --target=arm-linux-gnueabi;
 
 # Find Time Before Build 
 START_TIME=$($DATE +%s)
