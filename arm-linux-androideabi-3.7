@@ -37,10 +37,10 @@ txtrst=$(tput sgr0) # Reset
 cd ../ && export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 cd build;
 
-# Make sure LLVM and friends are at the correct version, 3.6
-cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch https://github.com/frap129/llvm.git release_36 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch https://github.com/frap129/clang.git release_36 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_36 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+# Make sure LLVM and friends are at the correct version, 3.7
+cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch http://llvm.org/git/llvm.git release_37 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch http://llvm.org/git/clang.git release_37 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_37 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
 
 # Find Host OS and set OS specific variables
 IS_DARWIN=$(uname -a | grep Darwin)
@@ -84,7 +84,7 @@ fi;
 cd $TOOLCHAIN_ROOT/build;
 
 # Export Prefix Path
-export PREFIX_PATH=$TOOLCHAIN_ROOT/out/arm-linux-gnueabi-3.6;
+export PREFIX_PATH=$TOOLCHAIN_ROOT/out/arm-linux-androideabi-3.7;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -129,7 +129,7 @@ fi
 
 # Configure LLVM
 cd $TOOLCHAIN_ROOT/llvm;
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --enable-gold --enable-plugins --disable-werror --with-isl=/usr/ --with-binutils-include=$TOOLCHAIN_ROOT/llvm/tools/binutils/include --target=arm-linux-gnueabi;
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --enable-gold --enable-plugins --disable-werror --with-isl=/usr/ --with-binutils-include=$TOOLCHAIN_ROOT/llvm/tools/binutils/include --target=arm-linux-androideabi;
 
 # Find Time Before Build 
 START_TIME=$($DATE +%s)

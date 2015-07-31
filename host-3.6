@@ -84,7 +84,7 @@ fi;
 cd $TOOLCHAIN_ROOT/build;
 
 # Export Prefix Path
-export PREFIX_PATH=$TOOLCHAIN_ROOT/out/arm-linux-gnueabi-3.6;
+export PREFIX_PATH=$TOOLCHAIN_ROOT/out/host-3.6;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -129,7 +129,7 @@ fi
 
 # Configure LLVM
 cd $TOOLCHAIN_ROOT/llvm;
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --enable-gold --enable-plugins --disable-werror --with-isl=/usr/ --with-binutils-include=$TOOLCHAIN_ROOT/llvm/tools/binutils/include --target=arm-linux-gnueabi;
+./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --enable-gold --enable-plugins --disable-werror --with-isl=/usr/ --with-binutils-include=$TOOLCHAIN_ROOT/llvm/tools/binutils/include;
 
 # Find Time Before Build 
 START_TIME=$($DATE +%s)
