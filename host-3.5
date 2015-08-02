@@ -101,14 +101,16 @@ fi;
 [ -z "$CXXFLAGS" ] && export CXXFLAGS="-O2"
 
 # Configure LLVM
-cd $TOOLCHAIN_ROOT/llvm;
-./configure $PREFIX --enable-shared --enable-jit --enable-libffi --enable-optimized --enable-targets=all --enable-threads --enable-pthread --enable-gold --enable-plugins --disable-werror --with-isl=/usr/ --with-binutils-include=$TOOLCHAIN_ROOT/llvm/tools/binutils/include;
 
+mkdir ../cmake
+cd ../cmake
+
+cmake -DLINK_POLLY_INTO_TOOLS:Bool=ON -DCMAKE_CXX_FLAGS:STRING="-fPIC -Os -Wno-macro-redefined" -DCMAKE_INSTALL_PREFIX:Path=$PREFIX_PATH -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_BINUTILS_INCDIR=$TOOLCHAIN_ROOT/llvm/tools/binutils/include ../llvm
 # Find Time Before Build 
 START_TIME=$($DATE +%s)
 
 # Build LLVM
-if ! time make $MAKE_FLAGS -DLINK_POLLY_INTO_TOOLS:Bool=ON; then
+if ! time make $MAKE_FLAGS; then
   echo "LLVM failed to build."
   exit 1
 else
