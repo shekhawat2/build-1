@@ -95,33 +95,6 @@ else
     mkdir -p $PREFIX_PATH;
 fi;
 
-# Build ISL
-if ! [ -e $TOOLCHAIN_ROOT/out/isl.made ];
-then
-  cd $TOOLCHAIN_ROOT/isl;
-  ./configure --enable-static --enable-shared;
-  if ! make $MAKE_FLAGS; then
-    echo "ISL failed to build.";
-    exit 1;
-  else
-    sudo make install;
-    touch $TOOLCHAIN_ROOT/out/isl.made;	
-  fi
-fi
-
-# Build CLooG
-if ! [ -e $TOOLCHAIN_ROOT/out/cloog.made ];
-then
-  cd $TOOLCHAIN_ROOT/cloog;
-  ./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
-  if ! make $MAKE_FLAGS; then
-    echo "ISL failed to build.";
-    exit 1;
-  else
-    sudo make install;
-    touch $TOOLCHAIN_ROOT/out/cloog.made;	
-  fi
-fi
 
 # Add Optimizations to LLVM
 [ -z "$CFLAGS" ] && export CFLAGS="-O2"
@@ -135,7 +108,7 @@ cd $TOOLCHAIN_ROOT/llvm;
 START_TIME=$($DATE +%s)
 
 # Build LLVM
-if ! time make $MAKE_FLAGS; then
+if ! time make $MAKE_FLAGS -DLINK_POLLY_INTO_TOOLS:Bool=ON; then
   echo "LLVM failed to build."
   exit 1
 else
