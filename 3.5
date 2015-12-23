@@ -58,17 +58,10 @@ JOBS=$(bc <<< "($CPUS-1)*2")
 # Determine Make flags
 MAKE_FLAGS=-j"$JOBS";
 
-# Clean LLVM, CLooG, and ISL
+# Clean LLVM and ISL
 if [ -e $TOOLCHAIN_ROOT/llvm/Makefile ];
 then
     cd $TOOLCHAIN_ROOT/llvm;
-    make $MAKE_FLAGS clean;
-    make $MAKE_FLAGS distclean;
-fi;
-
-if [ -e $TOOLCHAIN_ROOT/cloog/Makefile ];
-then
-    cd $TOOLCHAIN_ROOT/cloog;
     make $MAKE_FLAGS clean;
     make $MAKE_FLAGS distclean;
 fi;

@@ -58,17 +58,10 @@ JOBS=$(bc <<< "($CPUS-1)*2")
 # Determine Make flags
 MAKE_FLAGS=-j"$JOBS";
 
-# Clean LLVM, CLooG, and ISL
+# Clean LLVM and ISL
 if [ -e $TOOLCHAIN_ROOT/llvm/Makefile ];
 then
     cd $TOOLCHAIN_ROOT/llvm;
-    make $MAKE_FLAGS clean;
-    make $MAKE_FLAGS distclean;
-fi;
-
-if [ -e $TOOLCHAIN_ROOT/cloog/Makefile ];
-then
-    cd $TOOLCHAIN_ROOT/cloog;
     make $MAKE_FLAGS clean;
     make $MAKE_FLAGS distclean;
 fi;
@@ -106,20 +99,6 @@ then
   else
     sudo make install;
     touch $TOOLCHAIN_ROOT/out/isl.made;	
-  fi
-fi
-
-# Build CLooG
-if ! [ -e $TOOLCHAIN_ROOT/out/cloog.made ];
-then
-  cd $TOOLCHAIN_ROOT/cloog;
-  ./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
-  if ! make $MAKE_FLAGS; then
-    echo "ISL failed to build.";
-    exit 1;
-  else
-    sudo make install;
-    touch $TOOLCHAIN_ROOT/out/cloog.made;	
   fi
 fi
 
