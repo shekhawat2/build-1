@@ -37,10 +37,10 @@ txtrst=$(tput sgr0) # Reset
 cd ../ && export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 cd build;
 
-# Make sure LLVM and friends are at the correct version, 3.5
-cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch https://github.com/frap129/llvm.git release_35 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch https://github.com/frap129/clang.git release_35 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_35 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+# Make sure LLVM and friends are at the correct version, 3.7
+cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch http://llvm.org/git/llvm.git release_37 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch http://llvm.org/git/clang.git release_37 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_37 && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
 
 # Find Host OS and set OS specific variables
 IS_DARWIN=$(uname -a | grep Darwin)
@@ -84,7 +84,7 @@ fi;
 cd $TOOLCHAIN_ROOT/build;
 
 # Export Prefix Path
-export PREFIX_PATH=$TOOLCHAIN_ROOT/out/host-3.5;
+export PREFIX_PATH=$TOOLCHAIN_ROOT/out/3.7;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -95,17 +95,43 @@ else
     mkdir -p $PREFIX_PATH;
 fi;
 
+# Build ISL
+if ! [ -e $TOOLCHAIN_ROOT/out/isl.made ];
+then
+  cd $TOOLCHAIN_ROOT/isl;
+  ./configure --enable-static --enable-shared;
+  if ! make $MAKE_FLAGS; then
+    echo "ISL failed to build.";
+    exit 1;
+  else
+    sudo make install;
+    touch $TOOLCHAIN_ROOT/out/isl.made;	
+  fi
+fi
+
+# Build CLooG
+if ! [ -e $TOOLCHAIN_ROOT/out/cloog.made ];
+then
+  cd $TOOLCHAIN_ROOT/cloog;
+  ./configure --with-isl=bundled --with-osl=bundled --with-gmp=system --enable-static --enable-shared --with-bits=gmp;
+  if ! make $MAKE_FLAGS; then
+    echo "ISL failed to build.";
+    exit 1;
+  else
+    sudo make install;
+    touch $TOOLCHAIN_ROOT/out/cloog.made;	
+  fi
+fi
 
 # Add Optimizations to LLVM
-[ -z "$CFLAGS" ] && export CFLAGS="-O2"
-[ -z "$CXXFLAGS" ] && export CXXFLAGS="-O2"
-
-# Configure LLVM
+[ -z "$CFLAGS" ] && export CFLAGS="-O2 -Wno-macro-redefined -fPIC"
+[ -z "$CXXFLAGS" ] && export CXXFLAGS="-O2 -Wno-macro-redefined -fPIC"
 
 mkdir ../cmake
 cd ../cmake
 
-cmake -DLINK_POLLY_INTO_TOOLS:Bool=ON -DCMAKE_CXX_FLAGS:STRING="-fPIC -Os -Wno-macro-redefined" -DCMAKE_INSTALL_PREFIX:Path=$PREFIX_PATH -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_BINUTILS_INCDIR=$TOOLCHAIN_ROOT/llvm/tools/binutils/include ../llvm
+cmake -DLINK_POLLY_INTO_TOOLS:Bool=ON -DCMAKE_CXX_FLAGS:STRING="-fPIC -Wno-macro-redefined" -DCMAKE_INSTALL_PREFIX:Path=/home/maple-potter/llvm/out/host-3.7 -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_BINUTILS_INCDIR=$TOOLCHAIN_ROOT/llvm/tools/binutils/include ../llvm
+
 # Find Time Before Build 
 START_TIME=$($DATE +%s)
 
