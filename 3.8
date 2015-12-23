@@ -41,6 +41,8 @@ cd build;
 cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch http://llvm.org/git/llvm.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
 cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch http://llvm.org/git/clang.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
 cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm/projects/openmp && git reset --hard && git fetch http://llvm.org/git/openmp.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+
 
 # Find Host OS and set OS specific variables
 IS_DARWIN=$(uname -a | grep Darwin)
