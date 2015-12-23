@@ -78,7 +78,6 @@ cd $TOOLCHAIN_ROOT/build;
 
 # Export Prefix Path
 export PREFIX_PATH=$TOOLCHAIN_ROOT/out/3.7;
-export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
 then
@@ -109,7 +108,7 @@ fi
 mkdir ../cmake
 cd ../cmake
 
-cmake -DLINK_POLLY_INTO_TOOLS:Bool=ON -DCMAKE_CXX_FLAGS:STRING="-fPIC -Wno-macro-redefined" -DCMAKE_INSTALL_PREFIX:Path=/home/maple-potter/llvm/out/host-3.7 -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_BINUTILS_INCDIR=$TOOLCHAIN_ROOT/llvm/tools/binutils/include ../llvm
+cmake -DLINK_POLLY_INTO_TOOLS:Bool=ON -DCMAKE_CXX_FLAGS:STRING="-fPIC -Wno-macro-redefined" -DCMAKE_INSTALL_PREFIX:Path=$PREFIX_PATH -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_BINUTILS_INCDIR=$TOOLCHAIN_ROOT/llvm/tools/binutils/include ../llvm
 
 # Find Time Before Build 
 START_TIME=$($DATE +%s)
