@@ -13,18 +13,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# Define Color Values
-red=$(tput setaf 1) # red
-grn=$(tput setaf 2) # green
-blu=$(tput setaf 4) # blue
-cya=$(tput setaf 6) # cyan
-txtbld=$(tput bold) # Bold
-bldred=${txtbld}$(tput setaf 1) # red
-bldgrn=${txtbld}$(tput setaf 2) # green
-bldblu=${txtbld}$(tput setaf 4) # blue
-bldcya=${txtbld}$(tput setaf 6) # cyan
-txtrst=$(tput sgr0) # Reset
-
 ###########################################################################
 ###########################################################################
 #####                                                                 #####
@@ -43,80 +31,37 @@ cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch https://git
 cd $TOOLCHAIN_ROOT/llvm/projects/compiler-rt && git reset --hard && git fetch https://github.com/dragon-tc/compiler-rt.git release_36 && git checkout FETCH_HEAD;
 cd $TOOLCHAIN_ROOT/llvm/projects/openmp && git reset --hard && git fetch https://github.com/dragon-tc/openmp.git release_36 && git checkout FETCH_HEAD;
 
-# Find Host OS and set OS specific variables
-IS_DARWIN=$(uname -a | grep Darwin)
-if [ -n "$IS_DARWIN" ]; then
-  CPUS=$(sysctl hw.ncpu | awk '{print $2}')
-  DATE=gdate
-else
-  CPUS=$(grep "^processor" /proc/cpuinfo | wc -l)
-  DATE=date
-fi;
+# Export Prefix Path
+export PREFIX_PATH=$TOOLCHAIN_ROOT/out/3.6;
 
-# Optimize CPU Threads
-JOBS=$(bc <<< "$CPUS+1");
-
-# Clean ISL
-if [ -e $TOOLCHAIN_ROOT/isl/Makefile ];
-then
-    cd $TOOLCHAIN_ROOT/isl;
-    make $MAKE_FLAGS clean;
-    make $MAKE_FLAGS distclean;
-fi;
-
-# Set Prefix Path
-PREFIX_PATH=$TOOLCHAIN_ROOT/out/3.6;
-
-if [ -d "$PREFIX_PATH" ];
-then
-    rm -rf $PREFIX_PATH;
-    mkdir -p $PREFIX_PATH;
-else
-    mkdir -p $PREFIX_PATH;
-fi;
-
-# Check if OPT will be used
-if [ $1 == "opt" ];
-then
-    OPT="-march=native -mcpu=native" 
-fi;
-
-# Build ISL
-if ! [ -e $TOOLoCHAIN_ROOT/out/isl.made ];
-then
-  cd $TOOLCHAIN_ROOT/isl;
-  ./configure --enable-static --enable-shared;
-  if ! make $MAKE_FLAGS; then
-    echo "ISL failed to build.";
-    exit 1;
-  else
-    sudo make install;
-    touch $TOOLCHAIN_ROOT/out/isl.made;	
-  fi;
-fi;
-
-# Configure LLVM with CMAKE
+# Clean tree
 if [ -d $TOOLCHAIN_ROOT/cmake ];
 then
-    rm -rf $TOOLCHAIN_ROOT/cmake;
+  $TOOLCHAIN_ROOT/build/common clean;
 fi;
-mkdir $TOOLCHAIN_ROOT/cmake;
-cd $TOOLCHAIN_ROOT/cmake;
 
-cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -fpermissive -fPIC -pipe $OPT" -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined -fPIC -pipe $OPT" -DLLVM_ENABLE_PIC:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX_PATH -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_ENABLE_THREADS:BOOL=ON -DLLVM_ENABLE_WARNINGS:BOOL=OFF -DLLVM_ENABLE_WERROR:BOOL=OFF -DLLVM_USE_SANITIZER:STRING=Address -DLLVM_BUILD_DOCS:BOOL=OFF -DLLVM_BUILD_DOXYGEN:BOOL=OFF -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF -DLLVM_INCLUDE_TESTS:BOOL=OFF -DLLVM_BINUTILS_INCDIR:PATH=$TOOLCHAIN_ROOT/llvm/tools/binutils/include -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64" -DCMAKE_BUILD_TYPE:STRING=Release $TOOLCHAIN_ROOT/llvm;
-
-# Find Time Before Build 
-START_TIME=$($DATE +%s);
-
-# Build LLVM
-if ! time cmake --build .; then
-  echo "LLVM failed to build.";
-  exit 1;
-else
-  cmake --build . --target install;
-  # Echo Time if Build Finishes
-  END_TIME=$($DATE +%s);
-  tmin=$(( (END_TIME-START_TIME)/60 ));
-  tsec=$(( (END_TIME-START_TIME)%60 ));
-  echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst};
+# Set OPT if requested
+if [ $1 == "opt" ];
+then
+    export OPT="-march=native -mtune=native" 
 fi;
+
+# Build ISL if required
+if ! [ -e $TOOLCHAIN_ROOT/out/isl.made ];
+then
+    $TOOLCHAIN_ROOT/build/common isl;
+fi;
+
+# Set flags for LLVM Compilation
+export LOCAL_CXX_FLAGS="-O3 -Wno-macro-redefined -fpermissive -fPIC -pipe $OPT"
+export LOCAL_C_FLAGS="-O3 -Wno-macro-redefined -fPIC -pipe $OPT"
+
+# Compile Toolchain
+$TOOLCHAIN_ROOT/build/common build;
+
+# Unset Local Variables
+unset TOOLCHAIN_ROOT
+unset PREFIX_PATH
+unset OPT
+unset LOCAL_CXX_FLAGS
+unset LOCAL_C_FLAGS

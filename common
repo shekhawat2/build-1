@@ -1,0 +1,148 @@
+#!/bin/bash
+# Copyright (C) 2015 Joe Maples
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+#   You may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+# Define Color Values
+red=$(tput setaf 1) # red
+grn=$(tput setaf 2) # green
+blu=$(tput setaf 4) # blue
+cya=$(tput setaf 6) # cyan
+txtbld=$(tput bold) # Bold
+bldred=${txtbld}$(tput setaf 1) # red
+bldgrn=${txtbld}$(tput setaf 2) # green
+bldblu=${txtbld}$(tput setaf 4) # blue
+bldcya=${txtbld}$(tput setaf 6) # cyan
+txtrst=$(tput sgr0) # Reset
+
+###########################################################################
+###########################################################################
+#####                                                                 #####
+#####            D R A G O N T C   B U I L D   S Y S T E M            #####
+#####                                                                 #####
+###########################################################################
+###########################################################################
+
+# Find Host OS and set OS specific variables
+IS_DARWIN=$(uname -a | grep Darwin)
+if [ -n "$IS_DARWIN" ]; then
+  CPUS=$(sysctl hw.ncpu | awk '{print $2}')
+  DATE=gdate
+else
+  CPUS=$(grep "^processor" /proc/cpuinfo | wc -l)
+  DATE=date
+fi;
+
+# Optimize CPU Threads
+JOBS=$(bc <<< "$CPUS+1");
+
+# Function to clean tree
+clean() {
+if [ -e $TOOLCHAIN_ROOT/isl/Makefile ];
+then
+    cd $TOOLCHAIN_ROOT/isl;
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
+fi;
+if [ -d $TOOLCHAIN_ROOT/cmake ];
+then
+    rm -rf $TOOLCHAIN_ROOT/cmake;
+fi;
+if [ -d "$PREFIX_PATH" ];
+then
+    rm -rf $PREFIX_PATH;
+    mkdir -p $PREFIX_PATH;
+else
+    mkdir -p $PREFIX_PATH;
+fi;
+}
+
+# Function to build and install ISL
+isl() {
+cd $TOOLCHAIN_ROOT/isl;
+./configure --enable-static --enable-shared;
+if ! make $MAKE_FLAGS; then
+  echo "ISL failed to build.";
+  exit 1;
+else
+  sudo make install;
+  touch $TOOLCHAIN_ROOT/out/isl.made
+fi;
+}
+
+build-failed() {
+${red}
+echo "";
+echo -e "*************************************";
+echo -e "      ______      _ __         ____";
+echo -e "     / ____/___ _(_) /__  ____/ / /";
+echo -e "    / /_  / __ `/ / / _ \/ __  / /";
+echo -e "   / __/ / /_/ / / /  __/ /_/ /_/";
+echo -e "  /_/    \__,_/_/_/\___/\__,_(_)";
+echo -e"";
+echo -e"   DragonTC has failed to compile!";
+echo -e"*************************************";
+${txtrst}
+}
+
+build-completed() {
+${grn}
+echo "";
+echo -e "*****************************************************";
+echo -e "     ______                      __     __       __";
+echo -e "    / ____/___  ____ ___  ____  / /__  / /____  / /";
+echo -e "   / /   / __ \/ __ `__ \/ __ \/ / _ \/ __/ _ \/ /";
+echo -e "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/";
+echo -e "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)";
+echo -e "                      /_/";
+echo -e "";
+echo -e "         DragonTC has compiled successfully!";
+echo -e "*****************************************************";
+echo -e "";
+${txtrst}
+}
+
+# Function to build LLVM
+build() {
+# Enable ccache if requested
+if ! [ -z "$DTC_USE_CCACHE" ];
+then
+  CCACHE='-DCMAKE_CXX_COMPILER:STRING="ccache g++" -DCMAKE_C_COMPILER:STRING="ccache gcc"'
+fi;
+
+# Configure LLVM with CMAKE
+mkdir $TOOLCHAIN_ROOT/cmake;
+cd $TOOLCHAIN_ROOT/cmake;
+
+cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON $CCACHE -DCMAKE_CXX_FLAGS:STRING="$LOCAL_CXX_FLAGS" -DCMAKE_C_FLAGS:STRING="$LOCAL_C_FLAGS" -DLLVM_ENABLE_PIC:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX_PATH -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_ENABLE_THREADS:BOOL=ON -DLLVM_ENABLE_WARNINGS:BOOL=OFF -DLLVM_ENABLE_WERROR:BOOL=OFF -DLLVM_USE_SANITIZER:STRING=Address -DLLVM_BUILD_DOCS:BOOL=OFF -DLLVM_BUILD_DOXYGEN:BOOL=OFF -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF -DLLVM_INCLUDE_TESTS:BOOL=OFF -DLLVM_BINUTILS_INCDIR:PATH=$TOOLCHAIN_ROOT/llvm/tools/binutils/include -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64" -DCMAKE_BUILD_TYPE:STRING=Release $TOOLCHAIN_ROOT/llvm;
+
+# Find Time Before Build
+START_TIME=$($DATE +%s);
+
+# Build LLVM
+if ! time cmake --build .; then
+  build-failed;
+  exit 1;
+else
+  cmake --build . --target install;
+  # Echo Time if Build Finishes
+  END_TIME=$($DATE +%s);
+  tmin=$(( (END_TIME-START_TIME)/60 ));
+  tsec=$(( (END_TIME-START_TIME)%60 ));
+  build-completed;
+  echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst};
+  echo -e ${bldgrn}"Toolchain located at: $PREFIX_PATH"${txtrst};
+fi;
+}
+
+$1
