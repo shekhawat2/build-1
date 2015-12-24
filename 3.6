@@ -90,7 +90,7 @@ then
 fi;
 
 # Configure LLVM with CMAKE
-if [ -e $TOOLCHAIN_ROOT/cmake ];
+if [ -d $TOOLCHAIN_ROOT/cmake ];
 then
     rm -rf $TOOLCHAIN_ROOT/cmake;
 fi;
