@@ -57,9 +57,6 @@ fi
 # Optimize CPU Threads
 JOBS=$(bc <<< "$CPUS+1");
 
-# Determine Make flags
-MAKE_FLAGS=-j"$JOBS";
-
 # Clean ISL
 if [ -e $TOOLCHAIN_ROOT/isl/Makefile ];
 then
@@ -107,11 +104,11 @@ cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-r
 START_TIME=$($DATE +%s);
 
 # Build LLVM
-if ! time make $MAKE_FLAGS; then
+if ! time cmake --build .; then
   echo "LLVM failed to build.";
   exit 1;
 else
-  make install && make install;
+  cmake --build . --target install;
   # Copy Sanitizer libraries
   cp $TOOLCHAIN_ROOT/build/lib/3.8/* $PREFIX_PATH/lib/clang/3.8*/lib/linux/;
   # Echo Time if Build Finishes
