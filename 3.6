@@ -54,7 +54,7 @@ else
 fi;
 
 # Optimize CPU Threads
-JOBS=$(bc <<< "$CPUS+1);
+JOBS=$(bc <<< "$CPUS+1");
 
 # Clean ISL
 if [ -e $TOOLCHAIN_ROOT/isl/Makefile ];
