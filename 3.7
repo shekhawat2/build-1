@@ -54,7 +54,7 @@ else
 fi;
 
 # Optimize CPU Threads
-JOBS=$(bc <<< "($CPUS-1)*2");
+JOBS=$(bc <<< "$CPUS+1");
 
 # Determine Make flags
 MAKE_FLAGS=-j"$JOBS";
