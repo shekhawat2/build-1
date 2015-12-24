@@ -29,6 +29,7 @@ cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch http://github.com/drago
 cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch http://llvm.org/git/clang.git release_37 && git checkout FETCH_HEAD;
 cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git release_37 && git checkout FETCH_HEAD;
 cd $TOOLCHAIN_ROOT/llvm/projects/compiler-rt && git reset --hard && git fetch http://llvm.org/git/compiler-rt.git release_37 && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/libcxx && git reset --hard && git fetch https://github.com/dragon-tc/libcxx.git release_37 && git checkout FETCH_HEAD;
 cd $TOOLCHAIN_ROOT/llvm/projects/openmp && git reset --hard && git fetch http://llvm.org/git/openmp.git release_37 && git checkout FETCH_HEAD;
 
 # Export Prefix Path
