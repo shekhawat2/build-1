@@ -121,6 +121,8 @@ if ! time make $MAKE_FLAGS; then
   exit 1
 else
   make install && make install;
+  # Copy Sanitizer libraries
+  cp $TOOLCHAIN_ROOT/build/lib/3.7/* $PREFIX_PATH/lib/clang/3.7*/lib/linux/
   # Echo Time if Build Finishes
   END_TIME=$($DATE +%s)
   tmin=$(( (END_TIME-START_TIME)/60 ))
