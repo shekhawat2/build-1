@@ -35,14 +35,13 @@ txtrst=$(tput sgr0) # Reset
 
 # Find Source Root
 cd ../ && export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-cd build;
 
 # Make sure LLVM and friends are at the correct version, 3.8
-cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch http://llvm.org/git/llvm.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch http://llvm.org/git/clang.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/projects/compiler-rt && git reset --hard && git fetch http://llvm.org/git/compiler-rt.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
-cd $TOOLCHAIN_ROOT/llvm/projects/openmp && git reset --hard && git fetch http://llvm.org/git/openmp.git master && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT/build;
+cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch http://llvm.org/git/llvm.git master && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch http://llvm.org/git/clang.git master && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git master && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/compiler-rt && git reset --hard && git fetch http://llvm.org/git/compiler-rt.git master && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/openmp && git reset --hard && git fetch http://llvm.org/git/openmp.git master && git checkout FETCH_HEAD;
 
 
 # Find Host OS and set OS specific variables
@@ -56,7 +55,7 @@ else
 fi
 
 # Optimize CPU Threads
-JOBS=$(bc <<< "($CPUS-1)*2")
+JOBS=$(bc <<< "($CPUS-1)*2");
 
 # Determine Make flags
 MAKE_FLAGS=-j"$JOBS";
@@ -75,8 +74,6 @@ then
     make $MAKE_FLAGS clean;
     make $MAKE_FLAGS distclean;
 fi;
-
-cd $TOOLCHAIN_ROOT/build;
 
 # Export Prefix Path
 export PREFIX_PATH=$TOOLCHAIN_ROOT/out/3.8;
@@ -106,27 +103,27 @@ fi
 # Configure LLVM with CMAKE
 if [ -e $TOOLCHAIN_ROOT/cmake ];
 then
-    rm -rf $TOOLCHAIN_ROOT/cmake
+    rm -rf $TOOLCHAIN_ROOT/cmake;
 fi;
 mkdir $TOOLCHAIN_ROOT/cmake;
 cd $TOOLCHAIN_ROOT/cmake;
 
-cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined" -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined" -DLLVM_ENABLE_PIC:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX_PATH -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_ENABLE_THREADS:BOOL=ON -DLLVM_ENABLE_WARNINGS:BOOL=OFF -DLLVM_ENABLE_WERROR:BOOL=OFF -DLLVM_USE_SANITIZER:STRING=Address -DLLVM_BUILD_DOCS:BOOL=OFF LLVM_BUILD_DOXYGEN:BOOL=OFF -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF -DLLVM_INCLUDE_TESTS:BOOL=OFF -DLLVM_BINUTILS_INCDIR=$TOOLCHAIN_ROOT/llvm/tools/binutils/include -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64" -DCMAKE_BUILD_TYPE:STRING=Release $TOOLCHAIN_ROOT/llvm
+cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined" -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined" -DLLVM_ENABLE_PIC:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX_PATH -DLLVM_PARALLEL_COMPILE_JOBS=$JOBS -DLLVM_PARALLEL_LINK_JOBS=$JOBS -DLLVM_ENABLE_THREADS:BOOL=ON -DLLVM_ENABLE_WARNINGS:BOOL=OFF -DLLVM_ENABLE_WERROR:BOOL=OFF -DLLVM_USE_SANITIZER:STRING=Address -DLLVM_BUILD_DOCS:BOOL=OFF LLVM_BUILD_DOXYGEN:BOOL=OFF -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF -DLLVM_INCLUDE_TESTS:BOOL=OFF -DLLVM_BINUTILS_INCDIR=$TOOLCHAIN_ROOT/llvm/tools/binutils/include -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64" -DCMAKE_BUILD_TYPE:STRING=Release $TOOLCHAIN_ROOT/llvm;
 
 # Find Time Before Build 
-START_TIME=$($DATE +%s)
+START_TIME=$($DATE +%s);
 
 # Build LLVM
 if ! time make $MAKE_FLAGS; then
-  echo "LLVM failed to build."
-  exit 1
+  echo "LLVM failed to build.";
+  exit 1;
 else
   make install && make install;
   # Copy Sanitizer libraries
-  cp $TOOLCHAIN_ROOT/build/lib/3.8/* $PREFIX_PATH/lib/clang/3.8*/lib/linux/
+  cp $TOOLCHAIN_ROOT/build/lib/3.8/* $PREFIX_PATH/lib/clang/3.8*/lib/linux/;
   # Echo Time if Build Finishes
-  END_TIME=$($DATE +%s)
-  tmin=$(( (END_TIME-START_TIME)/60 ))
-  tsec=$(( (END_TIME-START_TIME)%60 ))
-  echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst}
-fi
+  END_TIME=$($DATE +%s);
+  tmin=$(( (END_TIME-START_TIME)/60 ));
+  tsec=$(( (END_TIME-START_TIME)%60 ));
+  echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst};
+fi;
