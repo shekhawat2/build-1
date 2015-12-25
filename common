@@ -145,7 +145,7 @@ else
   echo -e ${grn} "*****************************************************" ${txtrst};
   echo -e  "";
   echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst};
-  echo -e ${bldgrn}"Toolchain located at: $PREFIX_PATH"${txtrst};
+  echo -e ${bldgrn}"Toolchain located at:${txtrst} ${grn}$PREFIX_PATH"${txtrst};
 fi;
 
 # Unset Local Variables
