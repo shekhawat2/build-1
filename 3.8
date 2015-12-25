@@ -39,7 +39,7 @@ then
 fi;
 
 # Set OPT if requested
-if [ $1 == "opt" ];
+if [ "$1" == "opt" ];
 then
     export OPT="-march=native -mtune=native" 
 fi;
