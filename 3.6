@@ -50,9 +50,9 @@ then
     $TOOLCHAIN_ROOT/build/common isl;
 fi;
 
-# Set flags for LLVM Compilation
-export LOCAL_CXX_FLAGS="-O3 -Wno-macro-redefined -fpermissive -fPIC -pipe -pthread -fopenmp -g0 $OPT"
-export LOCAL_C_FLAGS="-O3 -Wno-macro-redefined -fPIC -pipe -pthread -fopenmp -g0 $OPT"
+# Set locally required flags for LLVM Compilation
+export LOCAL_CXX_FLAGS="-fpermissive -fPIC"
+export LOCAL_C_FLAGS="-fPIC"
 
 # Compile Toolchain
 $TOOLCHAIN_ROOT/build/common build;
