@@ -104,6 +104,9 @@ else
   export CXX="g++";
 fi;
 
+# Speed up build with gold
+export LD="ld.gold"
+
 # Configure LLVM with CMAKE
 mkdir $TOOLCHAIN_ROOT/cmake;
 cd $TOOLCHAIN_ROOT/cmake;
@@ -156,6 +159,7 @@ unset LOCAL_CXX_FLAGS;
 unset LOCAL_C_FLAGS;
 unset CC;
 unset CXX;
+unset LD;
 }
 
 $1
