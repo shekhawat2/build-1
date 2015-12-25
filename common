@@ -102,7 +102,7 @@ cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON -DCMAKE_CXX_FLAGS:STRING="$LOCAL_CXX_FLAGS
 START_TIME=$($DATE +%s);
 
 # Build LLVM
-if ! time cmake --build .; then
+if ! time cmake --build . -- -j$JOBS; then
   echo "";
   echo -e ${red} "*************************************" ${txtrst};
   echo -e ${red} "      ______      _ __         ____" ${txtrst};
