@@ -29,6 +29,7 @@ cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch http://llvm.org/git/llv
 cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch http://llvm.org/git/clang.git master && git checkout FETCH_HEAD;
 cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch http://llvm.org/git/polly.git master && git checkout FETCH_HEAD;
 cd $TOOLCHAIN_ROOT/llvm/projects/compiler-rt && git reset --hard && git fetch http://llvm.org/git/compiler-rt.git master && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/libcxx && git reset --hard && git fetch http://llvm.org/git/libcxx.git master && git checkout FETCH_HEAD;
 cd $TOOLCHAIN_ROOT/llvm/projects/openmp && git reset --hard && git fetch http://llvm.org/git/openmp.git master && git checkout FETCH_HEAD;
 
 # Export Prefix Path
