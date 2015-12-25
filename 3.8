@@ -54,8 +54,8 @@ then
 fi;
 
 # Set flags for LLVM Compilation
-export LOCAL_CXX_FLAGS="-O3 -Wno-macro-redefined -pipe $OPT"
-export LOCAL_C_FLAGS="-O3 -Wno-macro-redefined -pipe $OPT"
+export LOCAL_CXX_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp $OPT"
+export LOCAL_C_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp $OPT"
 
 # Compile Toolchain
 $TOOLCHAIN_ROOT/build/common build;
