@@ -80,38 +80,6 @@ else
 fi;
 }
 
-build-failed() {
-${red}
-echo "";
-echo -e "*************************************";
-echo -e "      ______      _ __         ____";
-echo -e "     / ____/___ _(_) /__  ____/ / /";
-echo -e "    / /_  / __ `/ / / _ \/ __  / /";
-echo -e "   / __/ / /_/ / / /  __/ /_/ /_/";
-echo -e "  /_/    \__,_/_/_/\___/\__,_(_)";
-echo -e"";
-echo -e"   DragonTC has failed to compile!";
-echo -e"*************************************";
-${txtrst}
-}
-
-build-completed() {
-${grn}
-echo "";
-echo -e "*****************************************************";
-echo -e "     ______                      __     __       __";
-echo -e "    / ____/___  ____ ___  ____  / /__  / /____  / /";
-echo -e "   / /   / __ \/ __ `__ \/ __ \/ / _ \/ __/ _ \/ /";
-echo -e "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/";
-echo -e "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)";
-echo -e "                      /_/";
-echo -e "";
-echo -e "         DragonTC has compiled successfully!";
-echo -e "*****************************************************";
-echo -e "";
-${txtrst}
-}
-
 # Function to build LLVM
 build() {
 # Enable ccache if requested
@@ -135,7 +103,16 @@ START_TIME=$($DATE +%s);
 
 # Build LLVM
 if ! time cmake --build .; then
-  build-failed;
+  echo "";
+  echo -e ${red} "*************************************" ${txtrst};
+  echo -e ${red} "      ______      _ __         ____" ${txtrst};
+  echo -e ${red} "     / ____/___ _(_) /__  ____/ / /" ${txtrst};
+  echo -e ${red} "    / /_  / __ `/ / / _ \/ __  / /" ${txtrst};
+  echo -e ${red} "   / __/ / /_/ / / /  __/ /_/ /_/" ${txtrst};
+  echo -e ${red} "  /_/    \__,_/_/_/\___/\__,_(_)" ${txtrst};
+  echo -e ${red} "" ${txtrst};
+  echo -e ${red} "   DragonTC has failed to compile!" ${txtrst};
+  echo -e ${red} "*************************************" ${txtrst};
   exit 1;
 else
   cmake --build . --target install;
@@ -143,10 +120,30 @@ else
   END_TIME=$($DATE +%s);
   tmin=$(( (END_TIME-START_TIME)/60 ));
   tsec=$(( (END_TIME-START_TIME)%60 ));
-  build-completed;
+  echo -e "";
+  echo -e ${grn} "*****************************************************" ${txtrst};
+  echo -e ${grn} "     ______                      __     __       __" ${txtrst};
+  echo -e ${grn} "    / ____/___  ____ ___  ____  / /__  / /____  / /" ${txtrst};
+  echo -e ${grn} "   / /   / __ \/ __ `__ \/ __ \/ / _ \/ __/ _ \/ /" ${txtrst};
+  echo -e ${grn} "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/" ${txtrst};
+  echo -e ${grn} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)" ${txtrst};
+  echo -e ${grn} "                      /_/" ${txtrst};
+  echo -e ${grn} "" ${txtrst};
+  echo -e ${grn} "         DragonTC has compiled successfully!" ${txtrst};
+  echo -e ${grn} "*****************************************************" ${txtrst};
+  echo -e  "";
   echo -e ${bldgrn}"Total time elapsed:${txtrst} ${grn}$tmin minutes $tsec seconds"${txtrst};
   echo -e ${bldgrn}"Toolchain located at: $PREFIX_PATH"${txtrst};
 fi;
+
+# Unset Local Variables
+unset TOOLCHAIN_ROOT;
+unset PREFIX_PATH;
+unset OPT;
+unset LOCAL_CXX_FLAGS;
+unset LOCAL_C_FLAGS;
+unset CC;
+unset CXX;
 }
 
 $1
