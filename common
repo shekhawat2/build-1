@@ -46,6 +46,18 @@ fi;
 # Optimize CPU Threads
 JOBS=$(bc <<< "$CPUS+1");
 
+# Function to make sure LLVM and friends are at the correct version.
+sync() {
+cd $TOOLCHAIN_ROOT/llvm && rm -rf * && git reset --hard && git fetch $REMOTE_URL/llvm.git $BRANCH && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/tools/clang && rm -rf * && git reset --hard && git fetch $REMOTE_URL/clang.git $BRANCH && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/tools/polly && rm -rf * && git reset --hard && git fetch $REMOTE_URL/git/polly.git $BRANCH && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/compiler-rt && rm -rf * && git reset --hard && git fetch $REMOTE_URL/compiler-rt.git $BRANCH && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/libcxxabi && rm -rf * && git reset --hard && git fetch $REMOTE_URL/libcxxabi.git $BRANCH && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/libcxx && rm -rf * && git reset --hard && git fetch $REMOTE_URL/libcxx.git $BRANCH && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/libunwind && rm -rf * && git reset --hard && git fetch $REMOTE_URL/libunwind.git $BRANCH && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT/llvm/projects/openmp && rm -rf * && git reset --hard && git fetch $REMOTE_URL/openmp.git $BRANCH && git checkout FETCH_HEAD;
+}
+
 # Function to clean tree
 clean() {
 if [ -e $TOOLCHAIN_ROOT/isl/Makefile ];

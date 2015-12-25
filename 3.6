@@ -24,13 +24,10 @@
 # Find Source Root
 cd ../ && export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
-# Make sure LLVM and friends are at the correct version, 3.6
-cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch https://github.com/dragon-tc/llvm.git release_36 && git checkout FETCH_HEAD;
-cd $TOOLCHAIN_ROOT/llvm/tools/clang && git reset --hard && git fetch https://github.com/dragon-tc/clang.git release_36 && git checkout FETCH_HEAD;
-cd $TOOLCHAIN_ROOT/llvm/tools/polly && git reset --hard && git fetch https://github.com/dragon-tc/polly.git release_36 && git checkout FETCH_HEAD;
-cd $TOOLCHAIN_ROOT/llvm/projects/compiler-rt && git reset --hard && git fetch https://github.com/dragon-tc/compiler-rt.git release_36 && git checkout FETCH_HEAD;
-cd $TOOLCHAIN_ROOT/llvm/projects/libcxx && git reset --hard && git fetch https://github.com/dragon-tc/libcxx.git release_36 && git checkout FETCH_HEAD;
-cd $TOOLCHAIN_ROOT/llvm/projects/openmp && git reset --hard && git fetch https://github.com/dragon-tc/openmp.git release_36 && git checkout FETCH_HEAD;
+# Define specifications of remote repositories.
+export REMOTE_URL="https://github.com/dragon-tc"
+export BRANCH="release_36"
+$TOOLCHAIN_ROOT/build/common sync;
 
 # Export Prefix Path
 export PREFIX_PATH=$TOOLCHAIN_ROOT/out/3.6;
