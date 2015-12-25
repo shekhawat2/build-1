@@ -119,15 +119,15 @@ if ! time cmake --build . -- -j$JOBS; then
   echo -e ${red} "*************************************" ${txtrst};
   echo -e ${red} "      ______      _ __         ____" ${txtrst};
   echo -e ${red} "     / ____/___ _(_) /__  ____/ / /" ${txtrst};
-  echo -e ${red} "    / /_  / __ `/ / / _ \/ __  / /" ${txtrst};
+  echo -e ${red} "    / /_  / __ '/ / / _ \/ __  / /" ${txtrst};
   echo -e ${red} "   / __/ / /_/ / / /  __/ /_/ /_/" ${txtrst};
-  echo -e ${red} "  /_/    \__,_/_/_/\___/\__,_(_)" ${txtrst};
+  echo -e ${red} "  /_/    \__,_/_/_/\___/\__,_/_/ " ${txtrst};
   echo -e ${red} "" ${txtrst};
   echo -e ${red} "   DragonTC has failed to compile!" ${txtrst};
   echo -e ${red} "*************************************" ${txtrst};
   exit 1;
 else
-  cmake --build . --target install;
+  cmake --build . --target install -- -j$JOBS;
   # Echo Time if Build Finishes
   END_TIME=$($DATE +%s);
   tmin=$(( (END_TIME-START_TIME)/60 ));
@@ -136,9 +136,9 @@ else
   echo -e ${grn} "*****************************************************" ${txtrst};
   echo -e ${grn} "     ______                      __     __       __" ${txtrst};
   echo -e ${grn} "    / ____/___  ____ ___  ____  / /__  / /____  / /" ${txtrst};
-  echo -e ${grn} "   / /   / __ \/ __ `__ \/ __ \/ / _ \/ __/ _ \/ /" ${txtrst};
+  echo -e ${grn} "   / /   / __ \/ __ '__ \/ __ \/ / _ \/ __/ _ \/ /" ${txtrst};
   echo -e ${grn} "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/" ${txtrst};
-  echo -e ${grn} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)" ${txtrst};
+  echo -e ${grn} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_) " ${txtrst};
   echo -e ${grn} "                      /_/" ${txtrst};
   echo -e ${grn} "" ${txtrst};
   echo -e ${grn} "         DragonTC has compiled successfully!" ${txtrst};
