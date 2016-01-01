@@ -82,7 +82,7 @@ fi;
 # Function to build and install ISL
 isl() {
 cd $TOOLCHAIN_ROOT/isl;
-./configure --enable-static --enable-shared;
+./configure --enable-static;
 if ! make $MAKE_FLAGS; then
   echo "ISL failed to build.";
   exit 1;
