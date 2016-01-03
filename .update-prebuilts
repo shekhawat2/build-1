@@ -26,7 +26,6 @@ fi;
 # Compile and push all versions in $ver
 for prebuilt in $ver; do
 ./${prebuilt};
-
 cd ../out/${prebuilt} && git init && git add -A && commit -m "Update Prebuilt $DATE" -s;
 git push -f -u git@bitbucket.org:dragon-tc/dragontc-${prebuilt}.git master;
 done
