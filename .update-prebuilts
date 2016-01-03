@@ -16,11 +16,14 @@
 # Build working toolchains
 ./3.6;
 ./3.7;
+./3.8;
 
 # Initialize Repositories
 cd ../out/3.6 && git init && git add -A && commit -m "Update Prebuilt" -s;
 cd ../out/3.7 && git init && git add -A && commit -m "Update Prebuilt" -s;
+cd ../out/3.8 && git init && git add -A && commit -m "Update Prebuilt" -s;
 
 # Upload to BitBucket
 cd ../3.6 && git push -f -u git@bitbucket.org:dragon-tc/dragontc-3.6.git master;
 cd ../3.7 && git push -f -u git@bitbucket.org:dragon-tc/dragontc-3.7.git master;
+cd ../3.8 && git push -f -u git@bitbucket.org:dragon-tc/dragontc-3.8.git master;
