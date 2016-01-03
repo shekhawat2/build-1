@@ -46,6 +46,9 @@ fi;
 # Optimize CPU Threads
 JOBS=$(bc <<< "$CPUS+1");
 
+# Set Prefix Path
+PREFIX_PATH=$TOOLCHAIN_ROOT/out/$DTC_VERSION
+
 # Function to make sure LLVM and friends are at the correct version.
 sync() {
 cd $TOOLCHAIN_ROOT/llvm && git reset --hard && git fetch $REMOTE_URL/llvm.git $BRANCH && git checkout FETCH_HEAD;
@@ -92,6 +95,13 @@ else
 fi;
 }
 
+# Function to shrink and finalize the toolchain
+finalize() {
+cp -R $TOOLCHAIN_ROOT/build/aosp $PREFIX_PATH/;
+cp $TOOLCHAIN_ROOT/build/DragonTC-$DTC_VERSION.mk $PREFIX_PATH/DragonTC.mk;
+}
+
+
 # Function to build LLVM
 build() {
 # Enable ccache if requested
@@ -135,6 +145,7 @@ if ! time cmake --build . -- -j$JOBS; then
   exit 1;
 else
   cmake --build . --target install -- -j$JOBS;
+  finalize;
   # Echo Time if Build Finishes
   END_TIME=$($DATE +%s);
   tmin=$(( (END_TIME-START_TIME)/60 ));
