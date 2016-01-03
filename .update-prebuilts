@@ -13,17 +13,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# Build working toolchains
-./3.6;
-./3.7;
-./3.8;
+if [ -z "$1" ]; then
+ver="3.6 3.7 3.8";
+else
+ver="$1";
+fi;
 
-# Initialize Repositories
-cd ../out/3.6 && git init && git add -A && commit -m "Update Prebuilt" -s;
-cd ../out/3.7 && git init && git add -A && commit -m "Update Prebuilt" -s;
-cd ../out/3.8 && git init && git add -A && commit -m "Update Prebuilt" -s;
+for prebuilt in $ver; do
+./${prebuilt};
 
-# Upload to BitBucket
-cd ../3.6 && git push -f -u git@bitbucket.org:dragon-tc/dragontc-3.6.git master;
-cd ../3.7 && git push -f -u git@bitbucket.org:dragon-tc/dragontc-3.7.git master;
-cd ../3.8 && git push -f -u git@bitbucket.org:dragon-tc/dragontc-3.8.git master;
+cd ../out/${prebuilt} && git init && git add -A && commit -m "Update Prebuilt" -s;
+git push -f -u git@bitbucket.org:dragon-tc/dragontc-${prebuilt}.git master;
+done
