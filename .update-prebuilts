@@ -13,6 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# Date for commit message
+DATE=`date %m-%d`
+
 if [ -z "$1" ]; then
 ver="3.6 3.7 3.8";
 else
@@ -22,6 +25,6 @@ fi;
 for prebuilt in $ver; do
 ./${prebuilt};
 
-cd ../out/${prebuilt} && git init && git add -A && commit -m "Update Prebuilt" -s;
+cd ../out/${prebuilt} && git init && git add -A && commit -m "Update Prebuilt $DATE" -s;
 git push -f -u git@bitbucket.org:dragon-tc/dragontc-${prebuilt}.git master;
 done
