@@ -44,11 +44,5 @@ then
     export OPT="-march=native -mtune=native" 
 fi;
 
-# Build ISL if required
-if ! [ -e $TOOLCHAIN_ROOT/out/isl.made ];
-then
-    $TOOLCHAIN_ROOT/build/common isl;
-fi;
-
 # Compile Toolchain
 $TOOLCHAIN_ROOT/build/common build;

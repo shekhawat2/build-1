@@ -63,12 +63,6 @@ cd $TOOLCHAIN_ROOT/llvm/projects/openmp && rm -rf * && git reset --hard && git f
 
 # Function to clean tree
 clean() {
-if [ -e $TOOLCHAIN_ROOT/isl/Makefile ];
-then
-    cd $TOOLCHAIN_ROOT/isl;
-    make $MAKE_FLAGS clean;
-    make $MAKE_FLAGS distclean;
-fi;
 if [ -d $TOOLCHAIN_ROOT/cmake ];
 then
     rm -rf $TOOLCHAIN_ROOT/cmake;
@@ -79,19 +73,6 @@ then
     mkdir -p $PREFIX_PATH;
 else
     mkdir -p $PREFIX_PATH;
-fi;
-}
-
-# Function to build and install ISL
-isl() {
-cd $TOOLCHAIN_ROOT/isl;
-./configure --enable-static;
-if ! make $MAKE_FLAGS; then
-  echo "ISL failed to build.";
-  exit 1;
-else
-  sudo make install;
-  touch $TOOLCHAIN_ROOT/out/isl.made
 fi;
 }
 
