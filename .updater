@@ -18,7 +18,7 @@ DATE=`date +%B%_d`
 
 # Argument 1 defines version to update. Update all if argument 1 is empty.
 if [ -z "$1" ]; then
-ver="3.6 3.7 3.8";
+ver="3.6 3.7 3.8 3.9";
 else
 ver="$1";
 fi;
