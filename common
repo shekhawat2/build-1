@@ -46,6 +46,11 @@ fi;
 # Optimize CPU Threads
 JOBS=$(bc <<< "$CPUS+1");
 
+# Disable DTC_USE_CCACHE for broken versions
+if [ "$DTC_VERSION" -ge "3.8" ]; then
+  DTC_USE_CCACHE=
+fi;
+
 # Set Prefix Path
 PREFIX_PATH=$TOOLCHAIN_ROOT/out/$DTC_VERSION
 
