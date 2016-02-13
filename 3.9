@@ -43,3 +43,6 @@ if [ "$1" == "opt" ];
 then
     export OPT="-march=native -mtune=native" 
 fi;
+
+# Compile Toolchain
+$TOOLCHAIN_ROOT/build/common build;
