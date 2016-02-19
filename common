@@ -85,6 +85,8 @@ fi;
 finalize() {
 cp -R $TOOLCHAIN_ROOT/build/aosp $PREFIX_PATH/;
 cp $TOOLCHAIN_ROOT/build/DragonTC-$DTC_VERSION.mk $PREFIX_PATH/DragonTC.mk;
+current_date=$(date "+%Y%m%d");
+echo "$DTC_VERSION-DragonTC-$current_date" >> $PREFIX_PATH/VERSION;
 }
 
 
