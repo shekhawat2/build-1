@@ -46,11 +46,6 @@ fi;
 # Optimize CPU Threads
 JOBS=$(bc <<< "$CPUS+2");
 
-# Disable DTC_USE_CCACHE for broken versions
-if [[ $DTC_VERSION > "3.8" ]] ;then
-  DTC_USE_CCACHE= 
-fi;
-
 # Set Prefix Path
 PREFIX_PATH=$TOOLCHAIN_ROOT/out/$DTC_VERSION
 
@@ -83,8 +78,6 @@ fi;
 
 # Function to shrink and finalize the toolchain
 finalize() {
-cp -R $TOOLCHAIN_ROOT/build/aosp $PREFIX_PATH/;
-cp $TOOLCHAIN_ROOT/build/DragonTC-$DTC_VERSION.mk $PREFIX_PATH/DragonTC.mk;
 current_date=$(date "+%Y%m%d");
 echo "$DTC_VERSION-DragonTC-$current_date" >> $PREFIX_PATH/VERSION;
 }
@@ -92,15 +85,8 @@ echo "$DTC_VERSION-DragonTC-$current_date" >> $PREFIX_PATH/VERSION;
 
 # Function to build LLVM
 build() {
-# Enable ccache if requested
-if ! [ -z "$DTC_USE_CCACHE" ];
-then
-  export CC="ccache gcc";
-  export CXX="ccache g++";
-else
-  export CC="gcc";
-  export CXX="g++";
-fi;
+export CC="gcc";
+export CXX="g++";
 
 # Speed up build with gold
 export LD="ld.gold"
