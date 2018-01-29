@@ -80,7 +80,7 @@ fi;
 # Function to shrink and finalize the toolchain
 finalize() {
 current_date=$(date "+%Y%m%d");
-echo "$DTC_VERSION-DragonTC-$current_date" >> $PREFIX_PATH/VERSION;
+echo "DragonTC-$current_date" >> $PREFIX_PATH/VERSION;
 }
 
 
